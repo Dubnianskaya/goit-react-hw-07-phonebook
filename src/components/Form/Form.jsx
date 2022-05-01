@@ -2,9 +2,9 @@ import { memo, useState } from "react";
 import PropTypes from "prop-types";
 import { FormStyled, Label, Input, AddContactBtn } from "./Form.styled";
 
-function Form({ onSubmit }) {
+function Form({ onSubmit, adding }) {
   const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
+  const [phone, setPhone] = useState("");
 
   const handleInputChange = (event) => {
     switch (event.target.name) {
@@ -12,8 +12,8 @@ function Form({ onSubmit }) {
         setName(event.target.value);
         break;
 
-      case "number":
-        setNumber(event.target.value);
+      case "phone":
+        setPhone(event.target.value);
         break;
 
       default:
@@ -23,12 +23,12 @@ function Form({ onSubmit }) {
 
   const reset = () => {
     setName("");
-    setNumber("");
+    setPhone("");
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit({ name, number });
+    onSubmit({ name, phone });
     reset();
   };
 
@@ -50,15 +50,17 @@ function Form({ onSubmit }) {
         Number
         <Input
           type="tel"
-          name="number"
-          value={number}
+          name="phone"
+          value={phone}
           onChange={handleInputChange}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
         />
       </Label>
-      <AddContactBtn type="submit">Add contact</AddContactBtn>
+      <AddContactBtn type="submit">
+        {adding ? "Adding..." : "Add contact"}
+      </AddContactBtn>
     </FormStyled>
   );
 }

@@ -6,7 +6,7 @@ export const ContactsList = styled.ul`
   padding: 0;
 `;
 
-export const ContactListItem = styled.li`
+export const ContactListItemStyled = styled.li`
   display: flex;
   align-items: center;
   justify-content: space-between;

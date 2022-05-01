@@ -1,44 +1,34 @@
-import { memo } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  add,
-  deleting,
-  setFilter,
-  getContacts,
-  getFilter,
-} from "../../redux/contactSlice";
+import { useState, memo } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import Form from "../Form";
 import ContactList from "../ContactList";
 import Filter from "../Filter";
 import { Container, PhonebookTitle, ContactsTitle } from "./App.styled";
-import { nanoid } from "nanoid";
+import {
+  useFetchContactsQuery,
+  useCreateContactMutation,
+} from "../../redux/contactsSlice";
 
 function App() {
-  const contacts = useSelector(getContacts);
-  const filter = useSelector(getFilter);
-  const dispatch = useDispatch();
+  const { data: contacts, isLoading, isError } = useFetchContactsQuery();
+  const [addContact, { isLoading: isAdding }] = useCreateContactMutation();
+  const [filter, setFilter] = useState("");
 
-  const formSubmitHandler = ({ name, number }) => {
-    const contactCard = {
-      id: nanoid(),
-      name,
-      number,
-    };
-
-    const normalizedName = contactCard.name.toLowerCase();
+  const formSubmitHandler = ({ name, phone }) => {
+    const normalizedName = name.toLowerCase();
     const nameFilter = (contact) =>
       normalizedName === contact.name.toLowerCase();
     const contactSameNameChecked = contacts.some(nameFilter);
 
     if (contactSameNameChecked) {
-      return alert(`${contactCard.name} is already in contacts`);
+      return toast.error(`${name} is already in contacts`);
     } else {
-      dispatch(add(contactCard));
+      addContact({ name, phone });
     }
   };
 
   const changeFilter = (event) => {
-    dispatch(setFilter(event.target.value));
+    setFilter(event.target.value);
   };
 
   const getVisibleContacts = () => {
@@ -48,20 +38,18 @@ function App() {
     );
   };
 
-  const deleteContact = (contactId) => {
-    dispatch(deleting(contactId));
-  };
-
   return (
     <Container>
       <PhonebookTitle>Phonebook</PhonebookTitle>
-      <Form onSubmit={formSubmitHandler} />
+      <Form onSubmit={formSubmitHandler} adding={isAdding} />
       <ContactsTitle>Contacts</ContactsTitle>
       <Filter value={filter} onFilterChange={changeFilter} />
-      <ContactList
-        contacts={getVisibleContacts()}
-        onDeleteContact={deleteContact}
-      />
+      <>
+        {isError && <h2>Something went wrong :(</h2>}
+        {isLoading && <h2>Loading contacts...</h2>}
+        {contacts && <ContactList contactsItems={getVisibleContacts()} />}
+      </>
+      <Toaster />
     </Container>
   );
 }
